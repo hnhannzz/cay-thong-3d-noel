@@ -1,4 +1,4 @@
-import React, { useState, Suspense, useEffect, Component, ReactNode } from 'react';
+import React, { useState, Suspense, useEffect, ReactNode } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Loader } from '@react-three/drei';
 import { Experience } from './components/Experience';
@@ -8,7 +8,7 @@ import { MusicPlayer } from './components/MusicPlayer';
 import { TreeMode } from './types';
 
 interface ErrorBoundaryProps {
-  children: ReactNode;
+  children?: ReactNode;
 }
 
 interface ErrorBoundaryState {
@@ -16,7 +16,7 @@ interface ErrorBoundaryState {
 }
 
 // Simple Error Boundary to catch 3D resource loading errors (like textures)
-class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
