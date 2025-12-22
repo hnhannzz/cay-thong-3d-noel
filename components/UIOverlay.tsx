@@ -218,8 +218,8 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({ mode, onToggle, onPhotosUp
         </h1>
       </header>
 
-      {/* Right Bottom Action Area - Moved higher to bottom-32 on mobile */}
-      <div className="absolute bottom-32 right-4 md:bottom-8 md:right-8 flex flex-col items-end gap-4 pointer-events-auto">
+      {/* Right Bottom Action Area - Moved higher to bottom-36 on mobile to avoid overlap */}
+      <div className="absolute bottom-36 right-4 md:bottom-8 md:right-8 flex flex-col items-end gap-4 pointer-events-auto">
         
         {/* Hidden file input */}
         <input
