@@ -1,5 +1,3 @@
-import { ThreeElements } from '@react-three/fiber';
-
 export enum TreeMode {
   CHAOS = 'CHAOS',
   FORMED = 'FORMED'
@@ -16,10 +14,4 @@ export interface ParticleData {
   formedPos: [number, number, number];
   speed: number;
   color: string;
-}
-
-declare global {
-  namespace JSX {
-    interface IntrinsicElements extends ThreeElements {}
-  }
 }
