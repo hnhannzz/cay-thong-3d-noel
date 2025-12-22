@@ -66,14 +66,14 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({ mode, onToggle, onPhotosUp
 
   const handleShare = async () => {
     if (!uploadedPhotos || uploadedPhotos.length === 0) {
-      setShareError('请先上传照片');
+      setShareError('Vui lòng tải ảnh lên trước');
       return;
     }
 
     setIsSharing(true);
     setShareError('');
     setShareLink('');
-    setUploadProgress('准备上传...');
+    setUploadProgress('Đang chuẩn bị...');
 
     try {
       // Step 1: Get presigned upload URLs from server
@@ -97,13 +97,13 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({ mode, onToggle, onPhotosUp
       const urlsData = await urlsResponse.json();
 
       if (!urlsResponse.ok) {
-        throw new Error(urlsData.error || '获取上传地址失败');
+        throw new Error(urlsData.error || 'Lấy địa chỉ tải lên thất bại');
       }
 
       const { shareId, uploadUrls } = urlsData;
 
       // Step 2: Upload images directly to R2 using presigned URLs
-      setUploadProgress(`上传照片中 (0/${uploadedPhotos.length})...`);
+      setUploadProgress(`Đang Tải Ảnh Lên (0/${uploadedPhotos.length})...`);
       
       let uploadedCount = 0;
       const uploadPromises = uploadedPhotos.map(async (photo, index) => {
@@ -119,18 +119,18 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({ mode, onToggle, onPhotosUp
         });
 
         if (!uploadResponse.ok) {
-          throw new Error(`上传第 ${index + 1} 张图片失败`);
+          throw new Error(`Tải ảnh thứ ${index + 1} thất bại`);
         }
 
         uploadedCount++;
-        setUploadProgress(`上传照片中 (${uploadedCount}/${uploadedPhotos.length})...`);
+        setUploadProgress(`Đang Tải Ảnh Lên (${uploadedCount}/${uploadedPhotos.length})...`);
         return publicUrl;
       });
 
       const imageUrls = await Promise.all(uploadPromises);
 
       // Step 3: Complete the upload by storing metadata in KV
-      setUploadProgress('生成分享链接...');
+      setUploadProgress('Đang tạo liên kết...');
       const completeResponse = await fetch('/api/complete-upload', {
         method: 'POST',
         headers: {
@@ -151,7 +151,7 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({ mode, onToggle, onPhotosUp
       const completeData = await completeResponse.json();
 
       if (!completeResponse.ok) {
-        throw new Error(completeData.error || '保存分享信息失败');
+        throw new Error(completeData.error || 'Lưu thông tin chia sẻ thất bại');
       }
 
       setShareLink(completeData.shareLink);
@@ -179,12 +179,12 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({ mode, onToggle, onPhotosUp
           setShareLink(shareLink);
           return;
         } catch (storageError: any) {
-          setShareError('图片数据太大，请减少照片数量或大小');
+          setShareError('Ảnh quá lớn, vui lòng giảm số lượng hoặc kích thước');
           return;
         }
       }
       
-      setShareError(error.message || '分享失败，请重试');
+      setShareError(error.message || 'Chia sẻ thất bại, vui lòng thử lại');
     } finally {
       setIsSharing(false);
       setUploadProgress('');
@@ -204,7 +204,7 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({ mode, onToggle, onPhotosUp
   };
 
   const handleCreateMine = () => {
-    // 清除 URL 参数，刷新页面
+    // Clear URL params and reload
     window.location.href = window.location.origin;
   };
 
@@ -218,8 +218,8 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({ mode, onToggle, onPhotosUp
         </h1>
       </header>
 
-      {/* Right Bottom Action Area - Moved up on mobile to avoid MusicPlayer overlap */}
-      <div className="absolute bottom-24 right-4 md:bottom-8 md:right-8 flex flex-col items-end gap-4 pointer-events-auto">
+      {/* Right Bottom Action Area - Moved higher to bottom-32 on mobile */}
+      <div className="absolute bottom-32 right-4 md:bottom-8 md:right-8 flex flex-col items-end gap-4 pointer-events-auto">
         
         {/* Hidden file input */}
         <input
@@ -238,7 +238,7 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({ mode, onToggle, onPhotosUp
             className="group px-6 py-3 border-2 border-[#D4AF37] bg-black/70 backdrop-blur-md overflow-hidden transition-all duration-500 hover:shadow-[0_0_30px_#D4AF37] hover:border-[#fff] hover:bg-[#D4AF37]/20"
           >
             <span className="relative z-10 font-serif text-base md:text-lg text-[#D4AF37] tracking-[0.1em] group-hover:text-white transition-colors whitespace-nowrap">
-              制作我的圣诞树
+              Tạo Cây Của Tôi
             </span>
           </button>
         )}
@@ -267,7 +267,7 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({ mode, onToggle, onPhotosUp
                   className="group px-6 py-3 border-2 border-[#D4AF37] bg-black/70 backdrop-blur-md overflow-hidden transition-all duration-500 hover:shadow-[0_0_30px_#D4AF37] hover:border-[#fff] hover:bg-[#D4AF37]/20 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <span className="relative z-10 font-serif text-base md:text-lg text-[#D4AF37] tracking-[0.1em] group-hover:text-white transition-colors whitespace-nowrap">
-                    {uploadProgress || (isSharing ? '生成中...' : 'Chia Sẻ')}
+                    {uploadProgress || (isSharing ? 'Đang tạo...' : 'Chia Sẻ')}
                   </span>
                 </button>
                 {shareError && (
@@ -279,7 +279,7 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({ mode, onToggle, onPhotosUp
             {/* Share Link Display - Show after link is generated */}
             {shareLink && (
               <div className="bg-black/80 backdrop-blur-md border-2 border-[#D4AF37] p-4 max-w-sm">
-                <p className="text-[#F5E6BF] font-serif text-sm mb-2">分享链接已生成</p>
+                <p className="text-[#F5E6BF] font-serif text-sm mb-2">Liên kết chia sẻ đã sẵn sàng</p>
                 <div className="flex items-center gap-2 mb-2">
                   <input
                     type="text"
@@ -292,12 +292,12 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({ mode, onToggle, onPhotosUp
                     className="px-3 py-2 border border-[#D4AF37] bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 transition-colors shrink-0"
                   >
                     <span className="text-[#D4AF37] text-xs font-serif whitespace-nowrap">
-                      {copied ? '✓ 已复制' : '复制'}
+                      {copied ? '✓ Đã chép' : 'Sao chép'}
                     </span>
                   </button>
                 </div>
                 <p className="text-[#F5E6BF]/50 text-xs font-serif">
-                  30天后过期
+                  Hết hạn sau 30 ngày
                 </p>
               </div>
             )}
