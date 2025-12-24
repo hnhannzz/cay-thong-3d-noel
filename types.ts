@@ -1,22 +1,13 @@
 
 // Fix: Extend the global JSX namespace to include Three.js elements for React Three Fiber compatibility.
-// This resolves "Property '...' does not exist on type 'JSX.IntrinsicElements'" errors across the project.
+// We use React.JSX to merge with existing React definitions and avoid shadowing standard HTML elements.
 import { ThreeElements } from '@react-three/fiber'
 
 declare global {
-  /**
-   * For React 18+ where JSX types are often under the React namespace
-   */
   namespace React {
     namespace JSX {
       interface IntrinsicElements extends ThreeElements {}
     }
-  }
-  /**
-   * For other environments that look into the global JSX namespace
-   */
-  namespace JSX {
-    interface IntrinsicElements extends ThreeElements {}
   }
 }
 

@@ -1,4 +1,5 @@
-import React, { useState, Suspense, useEffect, ReactNode } from 'react';
+
+import React, { useState, Suspense, useEffect, ReactNode, Component } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Loader } from '@react-three/drei';
 import { Experience } from './components/Experience';
@@ -16,13 +17,14 @@ interface ErrorBoundaryState {
 }
 
 // Simple Error Boundary to catch 3D resource loading errors (like textures)
-class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+// Fix: Explicitly extend Component from 'react' and provide state/props types to ensure proper property resolution.
+class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(error: any) {
+  static getDerivedStateFromError(_: any): ErrorBoundaryState {
     return { hasError: true };
   }
 
