@@ -2,6 +2,11 @@
 import React, { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { TreeMode } from '../types';
+
+interface SnowfallProps {
+  mode: TreeMode;
+}
 
 const vertexShader = `
   uniform float uTime;
@@ -15,48 +20,42 @@ const vertexShader = `
   varying float vAlpha;
 
   void main() {
-    // Current position calculation
     vec3 pos = position;
     
-    // Vertical movement: reset to top when reaching bottom
     float verticalCycle = mod(uTime * aSpeed + aOffset, uHeight);
     pos.y = uHeight - verticalCycle;
     
-    // Horizontal sway (wind simulation)
     pos.x += sin(uTime * 0.4 + aOffset) * 1.5;
     pos.z += cos(uTime * 0.2 + aOffset) * 1.5;
 
     vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
     
-    // Size attenuation (smaller when further)
     gl_PointSize = aSize * (300.0 / -mvPosition.z);
     gl_Position = projectionMatrix * mvPosition;
     
-    // Fade out near the top and bottom edges for smooth appearance
     float edgeFade = smoothstep(0.0, 3.0, pos.y) * smoothstep(uHeight, uHeight - 3.0, pos.y);
     vAlpha = edgeFade;
   }
 `;
 
 const fragmentShader = `
+  uniform float uOpacity;
   varying float vAlpha;
 
   void main() {
-    // Round snowflake with soft, blurred edges
     float r = distance(gl_PointCoord, vec2(0.5));
     if (r > 0.5) discard;
     
-    // Soft radial gradient for a bokeh/soft snow look
     float mask = 1.0 - smoothstep(0.0, 0.5, r);
-    // Reduced global opacity (0.4 instead of 0.8) to prevent "burning" or glare
-    gl_FragColor = vec4(1.0, 1.0, 1.0, vAlpha * mask * 0.4);
+    // Multiply by uOpacity to control visibility dynamically
+    gl_FragColor = vec4(1.0, 1.0, 1.0, vAlpha * mask * 0.4 * uOpacity);
   }
 `;
 
-export const Snowfall: React.FC = () => {
-  // Reduced count for a cleaner look (1200 instead of 2500)
+export const Snowfall: React.FC<SnowfallProps> = ({ mode }) => {
   const count = 1200;
   const meshRef = useRef<THREE.Points>(null);
+  const opacityRef = useRef(1); // Track internal opacity for smooth lerping
   
   const height = 35;
   const radius = 25;
@@ -68,16 +67,15 @@ export const Snowfall: React.FC = () => {
     const sza = new Float32Array(count);
 
     for (let i = 0; i < count; i++) {
-      // Random position in a cylinder
       const angle = Math.random() * Math.PI * 2;
       const r = Math.sqrt(Math.random()) * radius;
       pos[i * 3] = r * Math.cos(angle);
       pos[i * 3 + 1] = Math.random() * height;
       pos[i * 3 + 2] = r * Math.sin(angle);
 
-      spd[i] = 0.8 + Math.random() * 1.5; // Slightly slower falling speed
-      off[i] = Math.random() * 100.0;     // Time offset
-      sza[i] = 0.8 + Math.random() * 2.2; // Smaller particle sizes (0.8-3.0 instead of 1.0-4.0)
+      spd[i] = 0.8 + Math.random() * 1.5;
+      off[i] = Math.random() * 100.0;
+      sza[i] = 0.8 + Math.random() * 2.2;
     }
 
     return { positions: pos, speeds: spd, offsets: off, sizes: sza };
@@ -87,11 +85,23 @@ export const Snowfall: React.FC = () => {
     uTime: { value: 0 },
     uHeight: { value: height },
     uRadius: { value: radius },
+    uOpacity: { value: 1.0 }, // New uniform to control overall snow visibility
   }), []);
 
-  useFrame((state) => {
+  useFrame((state, delta) => {
     if (meshRef.current) {
-      (meshRef.current.material as THREE.ShaderMaterial).uniforms.uTime.value = state.clock.elapsedTime;
+      const material = meshRef.current.material as THREE.ShaderMaterial;
+      material.uniforms.uTime.value = state.clock.elapsedTime;
+      
+      // Target opacity is 1 when formed, 0 when chaos
+      const targetOpacity = mode === TreeMode.FORMED ? 1.0 : 0.0;
+      
+      // Smoothly interpolate opacity
+      opacityRef.current = THREE.MathUtils.lerp(opacityRef.current, targetOpacity, delta * 2.0);
+      material.uniforms.uOpacity.value = opacityRef.current;
+      
+      // Toggle visibility property for optimization when completely hidden
+      meshRef.current.visible = opacityRef.current > 0.001;
     }
   });
 

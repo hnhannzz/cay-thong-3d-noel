@@ -86,8 +86,8 @@ export const Experience: React.FC<ExperienceProps> = ({ mode, handPosition, uplo
       />
       <pointLight position={[-10, 5, -10]} intensity={1} color="#D4AF37" />
 
-      {/* Atmospheric Snowfall */}
-      <Snowfall />
+      {/* Atmospheric Snowfall - Now sensitive to the tree mode */}
+      <Snowfall mode={mode} />
 
       <group position={[0, -5, 0]}>
         <Foliage mode={mode} count={12000} />
