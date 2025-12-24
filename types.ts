@@ -4,6 +4,17 @@
 import { ThreeElements } from '@react-three/fiber'
 
 declare global {
+  /**
+   * For React 18+ where JSX types are often under the React namespace
+   */
+  namespace React {
+    namespace JSX {
+      interface IntrinsicElements extends ThreeElements {}
+    }
+  }
+  /**
+   * For other environments that look into the global JSX namespace
+   */
   namespace JSX {
     interface IntrinsicElements extends ThreeElements {}
   }
