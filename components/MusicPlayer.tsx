@@ -226,10 +226,11 @@ export const MusicPlayer: React.FC = () => {
     <div 
       className={`
         fixed z-40 font-sans text-white overflow-hidden
-        backdrop-blur-2xl bg-black/90 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]
+        backdrop-blur-2xl bg-black/90 border border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.6)]
         transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]
+        will-change-[transform,width,height,border-radius]
         ${isMinimized 
-          ? 'bottom-4 left-4 right-4 h-16 rounded-full md:left-8 md:w-80 md:right-auto' 
+          ? 'bottom-4 left-4 right-4 h-16 rounded-[2.5rem] md:left-8 md:w-80 md:right-auto' 
           : 'bottom-4 left-4 right-4 h-[190px] rounded-[2.5rem] md:bottom-8 md:left-8 md:right-auto md:w-[380px] md:h-[190px]'
         }
       `}
@@ -244,8 +245,8 @@ export const MusicPlayer: React.FC = () => {
       {/* --- MINIMIZED VIEW --- */}
       <div className={`
           absolute inset-0 flex items-center gap-3 px-3 w-full h-full
-          transition-all duration-300
-          ${isMinimized ? 'opacity-100 scale-100 delay-300' : 'opacity-0 scale-90 pointer-events-none transform translate-y-4'}
+          transition-all duration-300 ease-out
+          ${isMinimized ? 'opacity-100 scale-100 delay-300' : 'opacity-0 scale-95 pointer-events-none transform translate-y-4'}
       `}>
         {/* Spinning Art/Icon */}
         <div className={`w-10 h-10 rounded-full overflow-hidden bg-gray-800 border border-white/20 relative shrink-0 ${isPlaying ? 'animate-[spin_4s_linear_infinite]' : ''}`}>
@@ -268,14 +269,14 @@ export const MusicPlayer: React.FC = () => {
         <div className="flex items-center gap-2">
           <button 
             onClick={togglePlay}
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-white text-black hover:scale-105 active:scale-90 transition-all shrink-0"
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-white text-black hover:scale-105 active:scale-90 transition-all shrink-0 shadow-sm"
           >
             {isPlaying ? <Pause size={14} fill="currentColor" /> : <Play size={14} fill="currentColor" className="ml-0.5" />}
           </button>
           
           <button 
             onClick={() => setIsMinimized(false)}
-            className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white rounded-full hover:bg-white/10"
+            className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white rounded-full hover:bg-white/10 transition-colors"
           >
             <ChevronUp size={20} />
           </button>
@@ -288,10 +289,9 @@ export const MusicPlayer: React.FC = () => {
           transition-all duration-500 ease-out
           ${!isMinimized ? 'opacity-100 translate-y-0 delay-200' : 'opacity-0 translate-y-8 pointer-events-none scale-95'}
       `}>
-        {/* Top Section: Album Art & Info Side-by-Side */}
+        {/* Top Section */}
         <div className="flex items-center gap-4 mb-4">
-          {/* Album Art Container */}
-          <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-800 shadow-2xl relative group shrink-0 border border-white/10">
+          <div className="w-16 h-16 rounded-2xl overflow-hidden bg-gray-800 shadow-2xl relative group shrink-0 border border-white/10">
             {metadata.coverUrl ? (
               <img src={metadata.coverUrl} alt="Album Art" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
             ) : (
@@ -299,10 +299,8 @@ export const MusicPlayer: React.FC = () => {
                 <Music size={24} className="text-white/30" />
               </div>
             )}
-            <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none"></div>
           </div>
 
-          {/* Track Info */}
           <div className="flex-1 min-w-0 flex flex-col justify-center">
             <h3 className="text-white font-bold text-base md:text-lg truncate leading-tight mb-0.5">
               {metadata.title}
@@ -312,7 +310,6 @@ export const MusicPlayer: React.FC = () => {
             </p>
           </div>
 
-          {/* Collapse Button */}
           <button 
             onClick={() => setIsMinimized(true)}
             className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-colors shrink-0 -mt-6"
@@ -321,15 +318,15 @@ export const MusicPlayer: React.FC = () => {
           </button>
         </div>
 
-        {/* Middle: Time & Progress */}
+        {/* Progress */}
         <div className="flex flex-col gap-1.5 mb-2 px-1">
-          <div className="flex justify-between text-[10px] text-gray-500 font-mono">
+          <div className="flex justify-between text-[10px] text-gray-500 font-mono tracking-tighter">
             <span>{formatTime(currentTime)}</span>
             <span>{formatTime(duration)}</span>
           </div>
-          <div className="relative h-1 bg-gray-800 rounded-full group cursor-pointer w-full">
+          <div className="relative h-1 bg-white/10 rounded-full group cursor-pointer w-full">
             <div 
-              className="absolute top-0 left-0 h-full bg-white rounded-full pointer-events-none transition-[width] duration-100 ease-linear shadow-[0_0_8px_rgba(255,255,255,0.4)]"
+              className="absolute top-0 left-0 h-full bg-white rounded-full pointer-events-none transition-[width] duration-100 ease-linear"
               style={{ width: `${(currentTime / (duration || 1)) * 100}%` }}
             ></div>
             <input
@@ -343,16 +340,15 @@ export const MusicPlayer: React.FC = () => {
           </div>
         </div>
 
-        {/* Bottom: Controls */}
+        {/* Controls */}
         <div className="flex justify-between items-center px-1 mt-auto">
-            {/* Volume Control */}
             <div className="flex items-center gap-2 group relative w-20">
               <button onClick={toggleMute} className="text-gray-500 hover:text-white transition-colors">
                 {isMuted || volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
               </button>
-              <div className="flex-1 h-0.5 bg-gray-800 rounded-full relative overflow-hidden">
+              <div className="flex-1 h-0.5 bg-white/10 rounded-full relative overflow-hidden">
                 <div 
-                  className="absolute left-0 top-0 h-full bg-gray-400 rounded-full"
+                  className="absolute left-0 top-0 h-full bg-white/50 rounded-full"
                   style={{ width: `${isMuted ? 0 : volume * 100}%` }}
                 />
                 <input 
@@ -367,7 +363,6 @@ export const MusicPlayer: React.FC = () => {
               </div>
             </div>
 
-            {/* Main Playback Controls */}
             <div className="flex items-center gap-5 md:gap-8">
               <button 
                 onClick={playPrev}
@@ -378,13 +373,9 @@ export const MusicPlayer: React.FC = () => {
               
               <button 
                 onClick={togglePlay}
-                className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-white text-black hover:scale-105 active:scale-90 transition-all shadow-lg hover:shadow-[0_0_20px_rgba(255,255,255,0.3)]"
+                className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-white text-black hover:scale-105 active:scale-90 transition-all shadow-xl"
               >
-                {isPlaying ? (
-                  <Pause size={18} md:size={20} fill="currentColor" />
-                ) : (
-                  <Play size={18} md:size={20} fill="currentColor" className="ml-1" />
-                )}
+                {isPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" className="ml-1" />}
               </button>
               
               <button 
@@ -395,7 +386,6 @@ export const MusicPlayer: React.FC = () => {
               </button>
             </div>
             
-            {/* Balance Spacer */}
             <div className="w-20"></div> 
         </div>
       </div>
